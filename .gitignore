@@ -1,1 +1,6 @@
 .env
+tmp
+build
+bin
+*_templ.txt
+*_templ.go

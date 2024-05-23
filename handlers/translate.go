@@ -18,7 +18,10 @@ func NewTranslateHander(t *translator.Translator) *TranslateHandler {
 
 func (h *TranslateHandler) Translate(w http.ResponseWriter, r *http.Request) {
 	var req model.Request
-	json.NewDecoder(r.Body).Decode(&req)
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
 
 	text, err := h.translator.Translate(req.Source, req.Language)
 	if err != nil {
@@ -26,6 +29,7 @@ func (h *TranslateHandler) Translate(w http.ResponseWriter, r *http.Request) {
 			Success: false,
 			Error:   err.Error(),
 		}
+		w.WriteHeader(http.StatusInternalServerError)
 		json.NewEncoder(w).Encode(resp)
 		return
 	}
@@ -34,5 +38,24 @@ func (h *TranslateHandler) Translate(w http.ResponseWriter, r *http.Request) {
 		Text:    text,
 	}
 
+	w.WriteHeader(http.StatusOK)
 	json.NewEncoder(w).Encode(resp)
+}
+
+func (h *TranslateHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	if err := r.ParseForm(); err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	sourceText := r.Form.Get("sourceText")
+	language := r.Form.Get("targetLang")
+
+	output, err := h.translator.Translate(sourceText, language)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+	}
+
+	w.WriteHeader(http.StatusOK)
+	w.Write([]byte(output))
 }

@@ -1,0 +1,67 @@
+package views
+
+import "github.com/jkeddari/aitranslate/translator"
+import "strings"
+
+templ inputText() {
+	<div class="w-1/2 pr-2">
+		<label for="sourceText" class="block text-sm font-medium text-gray-700">Text to Translate</label>
+		<textarea name="sourceText" rows="10" class="shadow-sm mt-1 block w-full sm:text-sm border border-gray-300 rounded-md" required></textarea>
+	</div>
+}
+
+templ resultText() {
+	<div class="w-1/2 pl-2">
+		<label for="output" class="block text-sm font-medium text-gray-700">Translated Text</label>
+		<div id="output" class="output mt-1 p-4 bg-gray-100 rounded-md border border-gray-300 min-h-[160px]"></div>
+	</div>
+}
+
+templ languageSelector() {
+	<div class="w-1/3 pr-2">
+		<label for="targetLang" class="block text-sm font-medium text-gray-700">Target Language</label>
+		<select id="targetLang" name="targetLang" class="mt-1 block w-full py-2 px-3 border border-gray-300 bg-white rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
+			for _, language := range translator.LanguagesList {
+				<option value={ language }>{ strings.Title(language) }</option>
+			}
+		</select>
+	</div>
+}
+
+templ translateButton() {
+	<div class="pl-2">
+		<button
+			type="submit"
+			id="translateBtn"
+			class="mt-6 bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
+		>Translate</button>
+	</div>
+}
+
+templ Home(title string) {
+	@layout(title) {
+		<body class="bg-gray-100 p-6">
+			<div class="container mx-auto max-w-4xl bg-white p-6 rounded-lg shadow-md">
+				<h1 class="text-2xl font-bold mb-4 text-center">aiTranslate</h1>
+				<form
+					method="POST"
+					action="/translate"
+					hx-post="/translate"
+					hx-target="#output"
+					hx-swap="innerHTML"
+					hx-vals='{"language":{targetLang}}'
+					hx-include="[name='targetLang']"
+				>
+					<div class="flex mb-4 items-center">
+						@languageSelector()
+						@translateButton()
+					</div>
+					<div class="flex">
+						@inputText()
+						@resultText()
+					</div>
+				</form>
+			</div>
+		</body>
+	}
+}
