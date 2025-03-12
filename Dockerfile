@@ -7,7 +7,11 @@ RUN go install github.com/a-h/templ/cmd/templ@latest
 COPY . /app
 RUN templ generate && CGO_ENABLED=0 go build -o bin/ ./...
 
+
 # Release stage
 FROM gcr.io/distroless/static-debian11
 COPY --from=build /app/bin/server /server
-CMD ["/server"]
+COPY --from=build /app/static /static
+EXPOSE 80
+USER nonroot:nonroot
+ENTRYPOINT ["/server"]

@@ -2,7 +2,7 @@ templ:
 	templ generate
 
 tailwindcss:
-	tailwindcss -i ./static/css/input.css -o ./static/css/styles.min.css --minify
+	tailwindcss -i input.css -o static/css/styles.min.css --minify
 
 dev:
 	air .

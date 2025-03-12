@@ -1,0 +1,23 @@
+services:
+  aitranslate:
+    image: ghcr.io/jkeddari/aitranslate:main
+    deploy:
+      replicas: 1
+      restart_policy:
+        condition: on-failure
+    volumes:
+      - ./env:/.env
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.aitranslate.rule=Host(`aitranslate.fr`)"
+      - "traefik.http.routers.aitranslate.entrypoints=websecure"
+      - "traefik.http.routers.aitranslate.tls=true"
+      - "traefik.http.routers.aitranslate.tls.certresolver=letsencrypt"
+    environment:
+      ADDR: ":80"
+    networks:
+      - traefik_network
+
+networks:
+  traefik_network:
+    external: true

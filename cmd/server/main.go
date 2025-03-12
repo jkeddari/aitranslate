@@ -19,7 +19,7 @@ func main() {
 
 	addr := os.Getenv("ADDR")
 	if addr == "" {
-		addr = "localhost:3000"
+		addr = ":3000"
 	}
 
 	t, err := translator.NewTranslator(apiKey)
@@ -30,10 +30,10 @@ func main() {
 	r := http.NewServeMux()
 
 	fileServer := http.FileServer(http.Dir("./static"))
-	r.Handle("GET /static/*", http.StripPrefix("/static/", fileServer))
+	r.Handle("GET /static/", http.StripPrefix("/static/", fileServer))
 
-	r.HandleFunc("POST /api/v1/translate", handlers.NewTranslateHander(t).Translate)
 	r.HandleFunc("GET /", handlers.NewHomeHandler().ServeHTTP)
+	r.HandleFunc("POST /api/v1/translate", handlers.NewTranslateHander(t).Translate)
 	r.HandleFunc("POST /translate", handlers.NewTranslateHander(t).ServeHTTP)
 
 	srv := &http.Server{
@@ -41,5 +41,6 @@ func main() {
 		Handler: r,
 	}
 
+	log.Println("Starting server on", addr)
 	log.Fatal(srv.ListenAndServe())
 }
